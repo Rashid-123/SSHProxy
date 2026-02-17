@@ -1,45 +1,3 @@
-// import { Request, Response, NextFunction } from 'express';
-// import jwt from "jsonwebtoken";
-// import { config } from '@/config/env';
-// import logger from '@/config/logger';
-// import type { AuthRequest } from '@/types/types';
-
-// // Verifies the httpOnly cookie token Runs on all protected routes
- 
-// export async function authenticateFromCookie(
-//     req: AuthRequest,
-//     res: Response,
-//     next: NextFunction
-// ) {
-//     try {
-//         const token = req.cookies?.auth_token;
-//         console.log("-------- inside the authmiddleware -------------")
-//         if (!token) {
-//             logger.warn('No auth token in request');
-//             return res.status(401).json({ error: 'Unauthorized: No token' });
-//         }
-
-//         // Verify token 
-//         const decoded = jwt.verify(token, config.jwtSecret) as {
-//             userId: string;
-//         };
-
-//         req.user = {
-//             userId: decoded.userId,
-//         }; 
-
-//         console.log(req.user)
-
-//         // logger.debug({ userId: req.user.userId }, 'Token verified');
-
-//         next();
-
-//     } catch (error) {
-//         logger.error({ error }, 'Token verification failed');
-//         res.status(401).json({ error: 'Unauthorized: Invalid token' });
-//     }
-// }
-
 
 import { Request, Response, NextFunction } from 'express';
 import jwt from "jsonwebtoken";
@@ -48,7 +6,7 @@ import logger from '@/config/logger';
 import type { AuthRequest } from '@/types/types';
 import prisma from '@/lib/prisma';
 
-// Simple in-memory cache (or use Redis)
+// Simple in-memory cache (further use Redis)
 const userCache = new Map<string, { user: any; expires: number }>();
 
 export async function authenticateFromCookie(
@@ -57,8 +15,13 @@ export async function authenticateFromCookie(
     next: NextFunction
 ) {
     try {
-        const token = req.cookies?.auth_token;
-        
+        const bearerToken = req.headers.authorization?.startsWith("Bearer ")
+            ? req.headers.authorization.split(" ")[1]
+            : null;
+
+        const token = req.cookies?.auth_token || bearerToken;
+        console.log(token);
+
         if (!token) {
             logger.warn('No auth token in request');
             return res.status(401).json({ error: 'Unauthorized: No token' });
@@ -72,9 +35,9 @@ export async function authenticateFromCookie(
         // Check cache first (2 minute TTL)
         const cached = userCache.get(decoded.userId);
         const now = Date.now();
-        
+
         let user;
-        
+
         if (cached && cached.expires > now) {
             // Use cached user
             user = cached.user;
@@ -88,7 +51,7 @@ export async function authenticateFromCookie(
                     email: true,
                     firstName: true,
                     lastName: true,
-                   
+
                 }
             });
 
@@ -97,7 +60,7 @@ export async function authenticateFromCookie(
                 return res.status(401).json({ error: 'Unauthorized: User not found' });
             }
 
-          
+
             // Cache for 2 minutes
             userCache.set(decoded.userId, {
                 user,
@@ -117,7 +80,7 @@ export async function authenticateFromCookie(
         if (error instanceof jwt.TokenExpiredError) {
             return res.status(401).json({ error: 'Token expired' });
         }
-        
+
         if (error instanceof jwt.JsonWebTokenError) {
             return res.status(401).json({ error: 'Invalid token' });
         }

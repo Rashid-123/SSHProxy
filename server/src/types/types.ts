@@ -13,15 +13,15 @@ export interface User {
 }
 
 export interface Machine {
-  id: number;
+  id: string;
   name: string;
   hostname: string;
   port: number;
   username: string;
   encryptedPrivateKey: string;
   ivPrivateKey: string;
-  encryptedPassphrase: string;
-  ivPassphrase: string;
+  encryptedPassphrase?: string;
+  ivPassphrase?: string;
   ownerId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -37,7 +37,6 @@ export interface CreateMachineInput {
   privateKey: string;
   passphrase?: string;
   password: string;
-  organizationId?: string;
 }
 
 
