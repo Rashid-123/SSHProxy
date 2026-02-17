@@ -2,19 +2,21 @@
   "node": {
     "d9ead5f14d7be668af1c307b4eb361da80b61926": {
       "workers": {
-        "app/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Frashid_05%2Fprojects%2Fprojects%2FSSHProxy%2Fclient%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fserver-actions.js%22%2C%5B%22invalidateCacheAction%22%5D%5D%5D&__client_imported__=true!",
         "app/dashboard/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Frashid_05%2Fprojects%2Fprojects%2FSSHProxy%2Fclient%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fserver-actions.js%22%2C%5B%22invalidateCacheAction%22%5D%5D%5D&__client_imported__=true!",
+        "app/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Frashid_05%2Fprojects%2Fprojects%2FSSHProxy%2Fclient%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fserver-actions.js%22%2C%5B%22invalidateCacheAction%22%5D%5D%5D&__client_imported__=true!",
         "app/login/[[...rest]]/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Frashid_05%2Fprojects%2Fprojects%2FSSHProxy%2Fclient%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fserver-actions.js%22%2C%5B%22invalidateCacheAction%22%5D%5D%5D&__client_imported__=true!",
-        "app/auth/callback/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Frashid_05%2Fprojects%2Fprojects%2FSSHProxy%2Fclient%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fserver-actions.js%22%2C%5B%22invalidateCacheAction%22%5D%5D%5D&__client_imported__=true!"
+        "app/auth/callback/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Frashid_05%2Fprojects%2Fprojects%2FSSHProxy%2Fclient%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fserver-actions.js%22%2C%5B%22invalidateCacheAction%22%5D%5D%5D&__client_imported__=true!",
+        "app/register/[[...rest]]/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Frashid_05%2Fprojects%2Fprojects%2FSSHProxy%2Fclient%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fserver-actions.js%22%2C%5B%22invalidateCacheAction%22%5D%5D%5D&__client_imported__=true!"
       },
       "layer": {
-        "app/page": "action-browser",
         "app/dashboard/page": "action-browser",
+        "app/page": "action-browser",
         "app/login/[[...rest]]/page": "action-browser",
-        "app/auth/callback/page": "action-browser"
+        "app/auth/callback/page": "action-browser",
+        "app/register/[[...rest]]/page": "action-browser"
       }
     }
   },
   "edge": {},
-  "encryptionKey": "z2bghGvL8lxYBRALi0WWdWkEvJ2yzRNllnC4LOGHgms="
+  "encryptionKey": "Tyw1WprCh4lJZgPyo4irFFx14/KijQrfEO4ONXUXIKk="
 }

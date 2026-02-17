@@ -9,15 +9,42 @@ datasource db {
 }
 
 model User {
-    id String @id @default(cuid())
-    clerkId String @unique
-    email String @unique
-    firstName String?
-    lastName String?
-    encryptionSalt String @default("")
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    id               String    @id @default(cuid())
+    clerkId          String    @unique
+    email            String    @unique
+    firstName        String?
+    lastName         String?
 
-    @@index([clerkId])
+    encryptionSalt   String    @default("")
+
+    machines         Machine[]
+
+    createdAt        DateTime  @default(now())
+    updatedAt        DateTime  @updatedAt
+
+    @@index([id])
     @@index([email])
 }
+
+model Machine {
+    id                       String    @id @default(cuid())
+    name                     String    @db.VarChar(100)
+    hostname                 String    @db.VarChar(255)
+    port                     Int       @default(22)
+    username                 String    @db.VarChar(100)
+
+    encryptedPrivateKey      String    @db.Text
+    ivPrivateKey             String    @db.Text
+    encryptedPassphrase      String    @db.Text
+    ivPassphrase             String    @db.Text
+
+    ownerId                  String
+    owner                    User      @relation(fields:[ownerId], references:[id] , onDelete: Cascade)
+    
+    createdAt                DateTime  @default(now())
+    updatedAt                DateTime  @updatedAt
+  
+    @@index([ownerId])
+    @@unique([ownerId, name]) // user cannot have dplicate machine names
+}
+

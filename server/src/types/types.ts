@@ -12,6 +12,35 @@ export interface User {
     updatedAt: Date;
 }
 
+export interface Machine {
+  id: number;
+  name: string;
+  hostname: string;
+  port: number;
+  username: string;
+  encryptedPrivateKey: string;
+  ivPrivateKey: string;
+  encryptedPassphrase: string;
+  ivPassphrase: string;
+  ownerId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+
+
+export interface CreateMachineInput {
+  name: string;
+  hostname: string;
+  port: number;
+  username: string;
+  privateKey: string;
+  passphrase?: string;
+  password: string;
+  organizationId?: string;
+}
+
+
 export interface AuthRequest extends Request {
     
     user?: {
