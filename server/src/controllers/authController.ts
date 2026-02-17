@@ -1,16 +1,18 @@
 import { Request, Response } from "express";
+import jwt from "jsonwebtoken";
+
 
 import { verifyToken } from "@clerk/backend";
 import { config } from "@/config/env";
 import { getOrCreateUser, getUserById } from "@/services/userService";
 import logger from "@/config/logger";
-import type { AuthRequest , ClerkJWTPayload } from "@/types/types";
+import type { AuthRequest, ClerkJWTPayload } from "@/types/types";
 
-
-// signle controller for login/register
+// single controller for login/register
 
 export const handleClerkAuth = async (req: Request, res: Response) => {
     try {
+        console.log("---AUTH controller -------")
         const { token } = req.body;
         if (!token) {
             return res.status(400).json({ error: 'Token required' });
@@ -21,18 +23,30 @@ export const handleClerkAuth = async (req: Request, res: Response) => {
             secretKey: config.clerk.secretKey,
         }) as ClerkJWTPayload;
 
+
         const clerkId = verified.sub;
         const email = verified.email ?? "";
         const firstName = verified.given_name ?? "";
         const lastName = verified.family_name ?? "";
 
-        logger.info({ clerkId, email }, 'Auth request received');
-
+        // logger.info({ clerkId, email }, 'Auth request received');
+        
+          
         // Get or Create user
         const user = await getOrCreateUser(clerkId, email, firstName, lastName);
+          
+        const appToken = jwt.sign(
+            {
+                userId: user.id,
+            },
+            config.jwtSecret,
+            { expiresIn: "1d" }
+        );
+
+        console.log(appToken)
 
         // set httpOnly cookie
-        res.cookie('auth_token', token, {
+        res.cookie('auth_token', appToken, {
             httpOnly: true,
             secure: config.nodeEnv === 'production',
             sameSite: 'lax',
@@ -40,8 +54,10 @@ export const handleClerkAuth = async (req: Request, res: Response) => {
             path: '/',
         });
 
-        logger.info({ userId: user.id }, 'Auth successful');
+        // logger.info({ userId: user.id }, 'Auth successful');
 
+        console.log("---- successfully authenticated -----------")
+       
         res.status(200).json({
             status: 'success',
             user: {
@@ -63,6 +79,7 @@ export const handleClerkAuth = async (req: Request, res: Response) => {
 
 export async function getCurrentUser(req: AuthRequest, res: Response) {
     try {
+        console.log("-------inside the get user controller --------")
         if (!req.user) {
             return res.status(401).json({ error: 'Not authenticated' });
         }
@@ -70,14 +87,14 @@ export async function getCurrentUser(req: AuthRequest, res: Response) {
         // User already verified by auth middleware
         // Just fetch from database
         const user = await getUserById(req.user.userId);
-
+        
         if (!user) {
             res.clearCookie('auth_token');
             return res.status(401).json({ error: 'User not found' });
         }
 
-        logger.debug({ userId: user.id }, 'User verified');
-
+        // logger.debug({ userId: user.id }, 'User verified');
+        console.log("---- user response ready for get user ----------")
         res.status(200).json({
             status: 'success',
             user: {
@@ -98,9 +115,10 @@ export async function getCurrentUser(req: AuthRequest, res: Response) {
 //--------- Logout user -------------
 
 export function logout(req: Request, res: Response) {
+    console.log("-------request received for logout --------")
     res.clearCookie('auth_token');
 
-    logger.info('User logged out');
+    // logger.info('User logged out');
 
     res.status(200).json({
         status: 'success',

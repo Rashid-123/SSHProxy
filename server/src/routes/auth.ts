@@ -6,7 +6,7 @@ import { authenticateFromCookie } from "@/middleware/auth";
 const router = Router();
 
 // public router
-router.post('/', authController.handleClerkAuth);    //   login/register
+router.post('/', authController.handleClerkAuth);    
 router.post('/logout', authController.logout);
 
 router.get('/me', authenticateFromCookie, authController.getCurrentUser)
