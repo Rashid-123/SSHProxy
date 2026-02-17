@@ -1,4 +1,4 @@
-// File: /home/rashid_05/projects/projects/SSHProxy/frontend/app/layout.tsx
+// File: /home/rashid_05/projects/projects/SSHProxy/client/app/layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

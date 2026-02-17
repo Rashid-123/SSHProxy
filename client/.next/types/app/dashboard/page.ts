@@ -1,4 +1,4 @@
-// File: /home/rashid_05/projects/projects/SSHProxy/frontend/app/dashboard/page.tsx
+// File: /home/rashid_05/projects/projects/SSHProxy/client/app/dashboard/page.tsx
 import * as entry from '../../../../app/dashboard/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
