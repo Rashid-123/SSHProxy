@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-
+import { clearUserCache } from "@/middleware/auth"
 import { verifyToken } from "@clerk/backend";
 import { config } from "@/config/env";
 import { getOrCreateUser, getUserById } from "@/services/userService";
@@ -30,11 +30,11 @@ export const handleClerkAuth = async (req: Request, res: Response) => {
         const lastName = verified.family_name ?? "";
 
         // logger.info({ clerkId, email }, 'Auth request received');
-        
-          
+
+
         // Get or Create user
         const user = await getOrCreateUser(clerkId, email, firstName, lastName);
-          
+
         const appToken = jwt.sign(
             {
                 userId: user.id,
@@ -57,7 +57,7 @@ export const handleClerkAuth = async (req: Request, res: Response) => {
         // logger.info({ userId: user.id }, 'Auth successful');
 
         console.log("---- successfully authenticated -----------")
-       
+
         res.status(200).json({
             status: 'success',
             user: {
@@ -87,7 +87,7 @@ export async function getCurrentUser(req: AuthRequest, res: Response) {
         // User already verified by auth middleware
         // Just fetch from database
         const user = await getUserById(req.user.userId);
-        
+
         if (!user) {
             res.clearCookie('auth_token');
             return res.status(401).json({ error: 'User not found' });
@@ -114,14 +114,30 @@ export async function getCurrentUser(req: AuthRequest, res: Response) {
 
 //--------- Logout user -------------
 
-export function logout(req: Request, res: Response) {
+export function logout(req: AuthRequest, res: Response) {
     console.log("-------request received for logout --------")
-    res.clearCookie('auth_token');
+    try {
+        const userId = req.user?.userId;
 
-    // logger.info('User logged out');
+        // Clear cache
+        if (userId) {
+            clearUserCache(userId);
+        }
+        // Clear cookie
+        res.clearCookie('auth_token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/'
+        });
 
-    res.status(200).json({
-        status: 'success',
-        message: 'Logged out successfully',
-    });
+
+        logger.info({ userId }, 'User logged out');
+
+        res.json({ success: true, message: 'Logged out successfully' });
+
+    } catch (error) {
+        logger.error({ error }, 'Logout failed');
+        res.status(500).json({ error: 'Logout failed' });
+    }
 }

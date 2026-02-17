@@ -7,7 +7,7 @@ const router = Router();
 
 // public router
 router.post('/', authController.handleClerkAuth);    
-router.post('/logout', authController.logout);
+router.post('/logout',authenticateFromCookie , authController.logout);
 
 router.get('/me', authenticateFromCookie, authController.getCurrentUser)
 
