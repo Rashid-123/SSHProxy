@@ -1,6 +1,8 @@
 node_modules/
 client/node_modules/
 server/node_modules/
+client/.next
+client/.env.local
 dist/
 build/
 .env

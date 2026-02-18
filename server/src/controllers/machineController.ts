@@ -15,6 +15,7 @@ export const create = async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ error: "Unauthorized" });
     }
+    console.log(req.user)
 
     const {
       name,
@@ -25,6 +26,7 @@ export const create = async (req: AuthRequest, res: Response) => {
       passphrase,
       password,
     } = req.body;
+    console.log(  name , hostname , username , privateKey, password )
 
     if (!name || !hostname || !username || !privateKey || !password) {
       return res.status(400).json({ error: "Missing required fields" });
