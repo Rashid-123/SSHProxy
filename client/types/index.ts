@@ -51,6 +51,7 @@ export interface MachineBasicInfo {
   hostname: string;
   port: number;
   username: string;
+  ownerId: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -67,6 +68,11 @@ export interface CreateMachineResponse {
 export interface ListMachinesResponse {
   status: 'success';
   data: MachineBasicInfo[];
+}
+
+export interface getMachineResponse {
+   status:'success';
+   data: MachineBasicInfo;
 }
 
 export interface DeleteMachineResponse {

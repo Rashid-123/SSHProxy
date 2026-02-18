@@ -1,5 +1,5 @@
 import api from "./api";
-import type { CreateMachineRequest, CreateMachineResponse, DeleteMachineResponse, ListMachinesResponse } from "@/types/index"
+import type { CreateMachineRequest, CreateMachineResponse, DeleteMachineResponse, ListMachinesResponse , getMachineResponse } from "@/types/index"
 
 
 export const createMachine = async (data: CreateMachineRequest) => {
@@ -14,6 +14,11 @@ export const createMachine = async (data: CreateMachineRequest) => {
 
 export const listMachines = async () => {
     const response = await api.get<ListMachinesResponse>('/api/machine');
+    return response.data;
+}
+
+export const getMachine = async (id: string) => {   
+    const response = await api.get<getMachineResponse>(`/api/machine/${id}`);
     return response.data;
 }
 

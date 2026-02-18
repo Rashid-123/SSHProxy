@@ -18,7 +18,7 @@ export const handleClerkAuth = async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'Token required' });
         }
 
-        // verify token with Clerk
+        // verify token with Clerk 
         const verified = await verifyToken(token, {
             secretKey: config.clerk.secretKey,
         }) as ClerkJWTPayload;

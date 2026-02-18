@@ -26,7 +26,7 @@ export const create = async (req: AuthRequest, res: Response) => {
       passphrase,
       password,
     } = req.body;
-    console.log(  name , hostname , username , privateKey, password )
+    console.log(name, hostname, username, privateKey, password)
 
     if (!name || !hostname || !username || !privateKey || !password) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -113,6 +113,53 @@ export const remove = async (req: AuthRequest, res: Response) => {
     });
   } catch (error) {
     console.error({ error }, "Delete machine error");
+
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "Unknown error" });
+    }
+  }
+};
+
+
+// ---------------------- Get individaul machine ---------------------
+
+export const getMachine = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const id = req.params.id as string;
+
+    const machine = await prisma.machine.findFirst({
+      where: {
+        id,
+        ownerId: req.user.userId,
+      },
+      select: {
+        id: true,
+        name: true,
+        hostname: true,
+        port: true,
+        username: true,
+        ownerId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!machine) {
+      return res.status(404).json({ error: "Machine not found" });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: machine,
+    });
+  } catch (error) {
+    console.error({ error }, "Get machine error");
 
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });

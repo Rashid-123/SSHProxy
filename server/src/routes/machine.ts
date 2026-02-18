@@ -13,5 +13,6 @@ router.get('/', machineController.list);
 
 // check for ownership of machine
 router.delete('/:id',requiredMachineOwner, machineController.remove);
+router.get('/:id', requiredMachineOwner, machineController.getMachine);
 
 export default router;

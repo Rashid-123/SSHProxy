@@ -28,6 +28,7 @@ export const requiredMachineOwner = async (req: AuthRequest, res: Response, next
         }
 
         next();
+        
     } catch (error: any) {
         console.error({error} , 'Authorization check failed');
         res.status(500).json({error: 'Authorization check failed'})
