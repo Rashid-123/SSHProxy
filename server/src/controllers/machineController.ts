@@ -3,7 +3,10 @@ import {
   createMachine,
   deleteMachine,
   getMachinesBasicInfo,
+  getMachineWithDecryptedCredentials,
 } from "@/services/machineService";
+import { createSession } from "@/lib/sessionStore";
+import crypto from "crypto";
 import type { AuthRequest } from "@/types/types";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
@@ -170,5 +173,45 @@ export const getMachine = async (req: AuthRequest, res: Response) => {
     } else {
       res.status(500).json({ error: "Unknown error" });
     }
+  }
+};
+
+//---------------------- Connect to machine ---------------------
+
+export const connect = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const { password } = req.body;
+    const machineId = req.params.id as string;
+
+    if (!password) {
+      return res.status(400).json({ error: "Password required" });
+    }
+
+    //  This will throw if password wrong
+    const machine = await getMachineWithDecryptedCredentials(
+      machineId,
+      req.user.userId,
+      password
+    );
+
+    const sessionId = crypto.randomUUID();
+    console.log({ sessionId }, "Session ID generated --------------");
+    createSession(sessionId, {
+      privateKey: machine.privateKey,
+      passphrase: machine.passphrase,
+      userId: req.user.userId,
+      machineId,
+    });
+
+    return res.status(200).json({
+      status: "ready",
+      sessionId,
+    });
+  } catch (err: any) {
+    return res.status(401).json({ error: "Invalid password" });
   }
 };

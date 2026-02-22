@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { AuthContextType, User } from '@/types';
-import { authenticateWithBackend, logoutUser } from '@/lib/auth';
+import { authenticateWithBackend, logoutUser } from '@/lib/api/auth';
 import { useClerk } from '@clerk/nextjs';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

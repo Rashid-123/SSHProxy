@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { listMachines, createMachine, deleteMachine } from '@/lib/machine';
+import { listMachines, createMachine, deleteMachine } from '@/lib/api/machine';
 import type { MachineBasicInfo, CreateMachineRequest } from '@/types/index';
 import AddMachineModal from './Addmachinemodal';
 import MachineList from './MachineList';

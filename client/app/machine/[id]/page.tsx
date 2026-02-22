@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getMachine, deleteMachine } from '@/lib/machine';
+import { getMachine, deleteMachine } from '@/lib/api/machine';
 import type { MachineBasicInfo } from '@/types/index';
 import MachineDetailCard from '@/components/machine/MachineDetailCard';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import Link from 'next/link';
+
 export default function MachinePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
-  const [machine, setMachine] = useState< MachineBasicInfo | null>(null);
+  const [machine, setMachine] = useState<MachineBasicInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -75,20 +75,24 @@ export default function MachinePage() {
         </button>
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">{machine.name}</h1>
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            className="px-4 py-2 text-sm border border-red-300 text-red-600 rounded hover:bg-red-50 disabled:opacity-50"
-          >
-            {deleting ? 'Deleting...' : 'Delete Machine'}
-          </button>
+
+          {/* Action buttons */}
+          <div className="flex items-center gap-3">
+            <button onClick={() => {router.push(`/machine/${id}/terminal`)}}>terminal</button>
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="px-4 py-2 text-sm border border-red-300 text-red-600 rounded hover:bg-red-50 disabled:opacity-50"
+            >
+              {deleting ? 'Deleting...' : 'Delete Machine'}
+            </button>
+          </div>
+
         </div>
       </div>
 
       {/* Detail card */}
       <MachineDetailCard machine={machine} />
-      
-      
     </div>
   );
 }

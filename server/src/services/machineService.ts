@@ -98,3 +98,61 @@ export const deleteMachine = async (
         where: { id: machineId },
     });
 };
+
+
+
+//----------------------- Get machine with decrypted credentials -----------------------
+
+export const getMachineWithDecryptedCredentials = async (
+    machineId: string,
+    userId: string,
+    password: string
+) => {
+    const machine = await prisma.machine.findUnique({
+        where: { id: machineId },
+    });
+
+    if (!machine) {
+        throw new Error("Machine not found");
+    }
+
+    if (machine.ownerId !== userId) {
+        throw new Error("Access denied");
+    }
+
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+    });
+
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    const salt = user.encryptionSalt;
+
+    // Decrypt private key
+    const decryptedPrivateKey = decrypt(
+        machine.encryptedPrivateKey,
+        machine.ivPrivateKey,
+        password,
+        salt,
+        machine.authTagPrivateKey
+    );
+
+    // Decrypt passphrase if exists
+    let decryptedPassphrase = "";
+    if (machine.encryptedPassphrase) {
+        decryptedPassphrase = decrypt(
+            machine.encryptedPassphrase,
+            machine.ivPassphrase,
+            password,
+            salt,
+            machine.authTagPassphrase
+        );
+    }
+
+    return {
+        privateKey: decryptedPrivateKey,
+        passphrase: decryptedPassphrase,
+    };
+}
