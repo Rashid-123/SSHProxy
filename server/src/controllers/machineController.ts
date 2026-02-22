@@ -9,7 +9,7 @@ import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 
 
-// ----------------- Create Machine -----------------------------
+// --------------------- Create Machine -----------------------------
 export const create = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) {
@@ -70,7 +70,9 @@ export const create = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// ----------------- List Machines -----------------------------
+
+// -------------------- List Machines -----------------------------
+
 export const list = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) {
@@ -94,7 +96,9 @@ export const list = async (req: AuthRequest, res: Response) => {
   }
 };
 
+
 // ----------------- Delete Machine -----------------------------
+
 export const remove = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) {

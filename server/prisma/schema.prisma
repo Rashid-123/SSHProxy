@@ -35,9 +35,12 @@ model Machine {
 
     encryptedPrivateKey      String    @db.Text
     ivPrivateKey             String    @db.Text
+    authTagPrivateKey        String    @db.Text 
+
     encryptedPassphrase      String    @db.Text
     ivPassphrase             String    @db.Text
-
+    authTagPassphrase        String    @db.Text
+    
     ownerId                  String
     owner                    User      @relation(fields:[ownerId], references:[id] , onDelete: Cascade)
     

@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { encrypt } from "@/lib/encryption";
+import { encrypt, decrypt } from "@/lib/encryption";
 import type { CreateMachineInput } from "@/types/types";
 
 // ----------------- Create Machine -----------------------------
@@ -18,7 +18,7 @@ export const createMachine = async (
     const salt = user.encryptionSalt;
 
     // Encrypt private key
-    const { encrypted: encryptedPrivateKey, iv: ivPrivateKey } = encrypt(
+    const { encrypted: encryptedPrivateKey, iv: ivPrivateKey, authTag: authTagPrivateKey } = encrypt(
         input.privateKey,
         input.password,
         salt
@@ -27,11 +27,13 @@ export const createMachine = async (
     // Encrypt passphrase if exists
     let encryptedPassphrase = "";
     let ivPassphrase = "";
+    let authTagPassphrase = "";
 
     if (input.passphrase) {
         const result = encrypt(input.passphrase, input.password, salt);
         encryptedPassphrase = result.encrypted;
         ivPassphrase = result.iv;
+        authTagPassphrase = result.authTag;
     }
 
     const machine = await prisma.machine.create({
@@ -42,7 +44,9 @@ export const createMachine = async (
             username: input.username,
             encryptedPrivateKey,
             ivPrivateKey,
+            authTagPrivateKey,
             encryptedPassphrase,
+            authTagPassphrase,
             ivPassphrase,
             owner: {
                 connect: { id: userId },
@@ -71,6 +75,7 @@ export const getMachinesBasicInfo = async (userId: string) => {
         },
     });
 };
+
 
 // ----------------- Delete Machine -----------------------------
 export const deleteMachine = async (

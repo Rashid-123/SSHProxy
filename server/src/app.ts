@@ -5,7 +5,6 @@ import { config } from '@/config/env';
 import logger from './config/logger';
 import routes from '@/routes/index';
 import { errorHandler } from './middleware/errorHandler';
-import type { AuthRequest } from './types/types';
 
 const app: Express = express();
 

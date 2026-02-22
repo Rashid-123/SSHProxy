@@ -6,7 +6,7 @@ import { getMachine, deleteMachine } from '@/lib/machine';
 import type { MachineBasicInfo } from '@/types/index';
 import MachineDetailCard from '@/components/machine/MachineDetailCard';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-
+import Link from 'next/link';
 export default function MachinePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -87,6 +87,8 @@ export default function MachinePage() {
 
       {/* Detail card */}
       <MachineDetailCard machine={machine} />
+      
+      
     </div>
   );
 }
