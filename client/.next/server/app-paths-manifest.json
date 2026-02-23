@@ -1,8 +1,0 @@
-{
-  "/page": "app/page.js",
-  "/auth/callback/page": "app/auth/callback/page.js",
-  "/login/[[...rest]]/page": "app/login/[[...rest]]/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/machine/[id]/terminal/page": "app/machine/[id]/terminal/page.js",
-  "/machine/[id]/page": "app/machine/[id]/page.js"
-}
