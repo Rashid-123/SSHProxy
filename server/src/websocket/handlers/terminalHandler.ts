@@ -16,9 +16,12 @@ export const handleTerminalConnection = async (
   req: IncomingMessage,
   userId: string
 ) => {
+
   const url = new URL(req.url!, `http://localhost`);
   const sessionId = url.searchParams.get("sessionId");
+
   console.log("-------- Handling terminal connection, sessionId: ", sessionId, " for user ", userId);
+
   if (!sessionId) {
     console.log("-------- No sessionId provided in WebSocket connection");
     ws.close(4000, "Missing sessionId");
@@ -70,7 +73,8 @@ export const handleTerminalConnection = async (
       { rows: 24, cols: 80 }, // default — client will send resize immediately
       (data) => {
         if (ws.readyState === WebSocket.OPEN) {
-          ws.send(data);
+          console.log("-------- Sending data to WebSocket (frontend): ", data);
+          ws.send(data.toString());
         }
       },
       () => {
@@ -97,10 +101,12 @@ export const handleTerminalConnection = async (
         const parsed = JSON.parse(text) as ResizeMessage;
 
         if (parsed.type === "resize" && sshStream) {
+          console.log("-------- Resizing SSH shell to cols: ", parsed.cols, " rows: ", parsed.rows);
           resizeSSHShell(sshStream, { rows: parsed.rows, cols: parsed.cols });
         }
       } catch {
         // Not JSON — raw terminal input, write directly to SSH
+        console.log("-------- Received message from WebSocket (frontend), writing to SSH stream", message.toString());
         if (sshStream) {
           sshStream.write(message);
         }

@@ -15,64 +15,81 @@ export default function Terminal({ sessionId }: TerminalProps) {
     const xtermRef = useRef<XTerm | null>(null);
     const socketRef = useRef<TerminalSocket | null>(null);
     const fitAddonRef = useRef<FitAddon | null>(null);
+    const resizeHandlerRef = useRef<(() => void) | null>(null);
 
     useEffect(() => {
         if (!terminalRef.current) return;
-            if (socketRef.current) return;
-        console.log("Terminal useEffect running");
 
-        // Init xterm
-        const xterm = new XTerm({
-            cursorBlink: true,
-            fontSize: 14,
-            fontFamily: 'Menlo, Monaco, "Courier New", monospace',
-            theme: { background: '#1e1e1e', foreground: '#d4d4d4' },
-            scrollback: 1000,
-        });
+        let cancelled = false;
 
-        const fitAddon = new FitAddon();
-        xterm.loadAddon(fitAddon);
-        xterm.open(terminalRef.current);
-        fitAddon.fit();
+        const init = () => {
+            if (cancelled) return;
+            if (!terminalRef.current) return;
 
-        xtermRef.current = xterm;
-        fitAddonRef.current = fitAddon;
+            const xterm = new XTerm({
+                cursorBlink: true,
+                fontSize: 14,
+                fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+                theme: { background: '#1e1e1e', foreground: '#d4d4d4' },
+                scrollback: 1000,
+            });
 
-        // Init WebSocket
-        const socket = new TerminalSocket({
-            sessionId,
-            backendUrl: process.env.NEXT_PUBLIC_WS_URL!,
-            onData: (data) => xterm.write(data),
-            onClose: () => xterm.write('\r\n\x1b[31mConnection closed.\x1b[0m\r\n'),
-            onError: () => xterm.write('\r\n\x1b[31mConnection error.\x1b[0m\r\n'),
-        });
-
-        socket.connect();
-        socketRef.current = socket;
-
-        // Keystrokes → WebSocket → SSH
-        xterm.onData((data) => {
-            socket.sendInput(data);
-        });
-
-        // Handle terminal resize
-        const handleResize = () => {
+            const fitAddon = new FitAddon();
+            xterm.loadAddon(fitAddon);
+            xterm.open(terminalRef.current);
             fitAddon.fit();
-            socket.sendResize(xterm.cols, xterm.rows);
+
+            xtermRef.current = xterm;
+            fitAddonRef.current = fitAddon;
+
+            const socket = new TerminalSocket({
+                sessionId,
+                backendUrl: process.env.NEXT_PUBLIC_WS_URL!,
+                onData: (data) => xterm.write(data),
+                onClose: () => xterm.write('\r\n\x1b[31mConnection closed.\x1b[0m\r\n'),
+                onError: () => xterm.write('\r\n\x1b[31mConnection error.\x1b[0m\r\n'),
+            });
+
+            socket.connect();
+            socketRef.current = socket;
+
+            xterm.onData((data) => socket.sendInput(data));
+
+            const handleResize = () => {
+                fitAddon.fit();
+                socket.sendResize(xterm.cols, xterm.rows);
+            };
+
+            window.addEventListener('resize', handleResize);
+            resizeHandlerRef.current = handleResize;
+
+            setTimeout(() => {
+                socket.sendResize(xterm.cols, xterm.rows);
+            }, 300);
         };
 
-        window.addEventListener('resize', handleResize);
-
-        // Send initial dimensions once connected
-        // Small delay to ensure WS is open
-        setTimeout(() => {
-            socket.sendResize(xterm.cols, xterm.rows);
-        }, 300);
+        const timer = setTimeout(init, 100);
 
         return () => {
-            window.removeEventListener('resize', handleResize);
-            socket.disconnect();
-            xterm.dispose();
+            cancelled = true;
+            clearTimeout(timer);
+
+            if (resizeHandlerRef.current) {
+                window.removeEventListener('resize', resizeHandlerRef.current);
+                resizeHandlerRef.current = null;
+            }
+
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+                socketRef.current = null;
+            }
+
+            if (xtermRef.current) {
+                xtermRef.current.dispose();
+                xtermRef.current = null;
+            }
+
+            fitAddonRef.current = null;
         };
     }, [sessionId]);
 

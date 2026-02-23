@@ -25,9 +25,12 @@ export const createSSHShell = (
   onClose: () => void,
   onError: (err: Error) => void
 ): Promise<SSHShellResult> => {
+
   return new Promise((resolve, reject) => {
+
     const client = new Client();
-     console.log("-------- Connecting to SSH host ", options.hostname, " with username ", options.username);
+    console.log("-------- Connecting to SSH host ", options.hostname, " with username ", options.username);
+    
     const connectConfig: ConnectConfig = {
       host: options.hostname,
       port: options.port,
@@ -52,10 +55,12 @@ export const createSSHShell = (
           }
 
           stream.on("data", (data: Buffer) => {
+            console.log("-------- Data received from SSH stream: ", data.toString());
             onData(data);
           });
 
           stream.stderr.on("data", (data: Buffer) => {
+
             onData(data);
           });
 
@@ -68,7 +73,7 @@ export const createSSHShell = (
         }
       );
     });
-      console.log("-------- SSH client connecting to ", options.hostname, " with username ", options.username);
+    console.log("-------- SSH client connecting to ", options.hostname, " with username ", options.username);
     client.on("error", (err) => {
       onError(err);
       reject(err);
@@ -86,6 +91,6 @@ export const resizeSSHShell = (stream: any, dimensions: TerminalDimensions) => {
   try {
     stream.setWindow(dimensions.rows, dimensions.cols, 0, 0);
   } catch (err) {
-    // stream may already be closed
+   
   }
 };

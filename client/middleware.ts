@@ -8,12 +8,12 @@ const isAuthRoute = createRouteMatcher(['/login', '/register']);
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   const { userId } = await auth();
   
-  // Check if JWT cookie exists (your backend auth)
-  const authCookie = req.cookies.get('auth_token'); // Adjust to your cookie name
+  // Check if JWT cookie exists ( backend auth )
+  const authCookie = req.cookies.get('auth_token'); 
   
   // Protected routes - require both Clerk session and backend JWT
   if (isProtectedRoute(req)) {
-    // Check Clerk authentication
+    // Checking for Clerk authentication
     if (!userId) {
       return NextResponse.redirect(new URL('/login', req.url));
     }
