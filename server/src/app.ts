@@ -1,7 +1,11 @@
 import express, { Express } from 'express';
 import cookieParser from 'cookie-parser';
- import http from 'http';
+import http from 'http';
 import { setupWebSocketServer } from './websocket';
+
+//
+import { connectRedis } from './config/redisClient';
+//
 import cors from 'cors';
 import { config } from '@/config/env';
 import logger from './config/logger';
@@ -40,11 +44,14 @@ const PORT = config.port;
 export const startServer = async () => {
     try {
 
-       const server = http.createServer(app);
+        await connectRedis();
+        logger.info('Redis connection established successfully');
+
+        const server = http.createServer(app);
 
         // Setup WebSocket server
         setupWebSocketServer(server);
-        
+
         server.listen(PORT, () => {
             logger.info(`Server running on port ${PORT}`);
         });

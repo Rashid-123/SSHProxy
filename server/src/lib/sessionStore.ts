@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import { redisClient } from "@/config/redisClient";
 
 interface SessionData {
   privateKey: string;
@@ -6,77 +6,75 @@ interface SessionData {
   userId: string;
   machineId: string;
   consumed: boolean;
-  expiresAt: number;
 }
 
-type CreateSessionInput = Omit<SessionData, "consumed" | "expiresAt">;
+type CreateSessionInput = Omit<SessionData, "consumed">;
 
-const sessions = new Map<string, SessionData>();
+const SESSION_TTL_SECOND = 90;
 
-const SESSION_TTL_MS = 90 * 1000; // 90 seconds
-
-// Auto cleanup expired sessions every 60s
-setInterval(() => {
-  const now = Date.now();
-  for (const [id, session] of sessions.entries()) {
-    if (session.expiresAt < now) {
-      sessions.delete(id);
-    }
-  }
-}, 60 * 1000);
-
-export const createSession = (
+export const createSession = async (
   sessionId: string,
   data: CreateSessionInput
-): void => {
-  console.log("-------- Creating session with ID: ", sessionId, " for user ", data.userId);
-  sessions.set(sessionId, {
+): Promise<void> => {
+
+  console.log("-------- Creating session with ID: ", sessionId, " and data: ", data);
+
+  const session: SessionData = {
     ...data,
     consumed: false,
-    expiresAt: Date.now() + SESSION_TTL_MS,
-  });
+  };
+
+  await redisClient.set(`session:${sessionId}`,
+    JSON.stringify(session),
+    {
+      EX: SESSION_TTL_SECOND
+    }
+  );
 };
 
-export const getSession = (sessionId: string): SessionData | null => {
-  const session = sessions.get(sessionId);
 
-  if (!session) return null;
+export const getSession = async (sessionId: string): Promise<SessionData | null> => {
 
-  if (session.expiresAt < Date.now()) {
-    sessions.delete(sessionId);
-    return null;
-  }
+  const data = await redisClient.get(`session:${sessionId}`);
+  if (!data) return null;
 
+  const session: SessionData = JSON.parse(data);
   return session;
 };
 
-export const consumeSession = (sessionId: string): SessionData | null => {
+export const consumeSession = async (sessionId: string): Promise<SessionData | null> => {
   console.log("-------- Consuming session with ID: ", sessionId);
-  const session = getSession(sessionId);
-   console.log("-------- Session retrieved for consumption: with ID: ", sessionId);
-  if (!session) return null;
 
-  // Reject if already consumed — no reuse
-  if (session.consumed) {
-    sessions.delete(sessionId);
+  const key = `session:${sessionId}`;
+
+  const data = await redisClient.get(key);
+  if (!data) {
     return null;
   }
 
-  // Mark consumed immediately before returning
+  const session: SessionData = JSON.parse(data);
+  if (session.consumed) {
+    await redisClient.del(key);
+    return null;
+  }
+
+  // Mark consumed
   session.consumed = true;
 
-  // Schedule deletion — credentials cleared from memory after caller uses them
-  setTimeout(() => {
-    sessions.delete(sessionId);
-  }, 0);
+  // Save updated session with short expiry
+  await redisClient.set(key, JSON.stringify(session), {
+    EX: 5, // delete very soon
+  });
 
   return session;
+
 };
 
-export const deleteSession = (sessionId: string): void => {
-  sessions.delete(sessionId);
+export const deleteSession = async (sessionId: string): Promise<void> => {
+  await redisClient.del(`session:${sessionId}`);
 };
 
-export const getSessionCount = (): number => {
-  return sessions.size;
+export const getSessionCount = async (): Promise<number> => {
+  const keys = await redisClient.keys("session:*");
+  return keys.length;
 };

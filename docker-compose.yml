@@ -1,0 +1,83 @@
+# version: '3.8'
+
+# services:
+#    postgres:
+#       image: postgres:15-alpine
+#       container_name: SSHProxy-postgres
+#       environment:
+#         POSTGRES_USER: SSHProxy_user
+#         POSTGRES_PASSWORD: SSHProxy_password
+#         POSTGRES_DB: SSHProxy_db
+#       ports:
+#        - '5432:5432'
+#       volumes:
+#        - postgres_data:/var/lib/postgresql/data
+#       healthcheck:
+#        test: ["CMD-SHELL", "pg_isready  -U SSHProxy_user"]
+#        interval: 10s
+#        timeout: 5s
+#        retries: 5
+
+#    redis:
+#       image: redis:7-alpine
+#       container_name: SSHProxy-redis
+#       volumes:
+#        - redis_data:/data
+#       ports:
+#        - '6379:6379'
+#       healthcheck:
+#        test: ["CMD", "redis-cli", "ping"]
+#        interval: 10s
+#        timeout: 5s
+#        retries: 5    
+
+# volumes:
+#   postgres_data:
+#   redis_data:
+
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: SSHProxy-postgres
+    environment:
+      POSTGRES_USER: SSHProxy_user
+      POSTGRES_PASSWORD: SSHProxy_password
+      POSTGRES_DB: SSHProxy_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U SSHProxy_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: SSHProxy-redis
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./server
+    container_name: SSHProxy-backend
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DATABASE_URL: postgresql://SSHProxy_user:SSHProxy_password@postgres:5432/SSHProxy_db
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: production
+    ports:
+      - "4000:4000"
+    restart: always
+
+volumes:
+  postgres_data:
+  redis_data:

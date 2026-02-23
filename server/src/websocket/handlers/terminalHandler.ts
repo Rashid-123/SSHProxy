@@ -29,7 +29,7 @@ export const handleTerminalConnection = async (
   }
 
   // Consume session — validates ownership + marks as used
-  const session = consumeSession(sessionId);
+  const session = await consumeSession(sessionId);
   
   console.log("-------- Session consumed: for sessionId ", sessionId);
   if (!session) {

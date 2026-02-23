@@ -199,7 +199,9 @@ export const connect = async (req: AuthRequest, res: Response) => {
     );
 
     const sessionId = crypto.randomUUID();
+
     console.log({ sessionId }, "Session ID generated --------------");
+
     createSession(sessionId, {
       privateKey: machine.privateKey,
       passphrase: machine.passphrase,
