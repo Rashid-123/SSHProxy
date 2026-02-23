@@ -7,14 +7,14 @@ export const handleTerminalConnection = async (
   ws: WebSocket,
   sessionId: string
 ) => {
-  const session = getSession(sessionId);
+  const session = await getSession(sessionId);
 
   if (!session) {
     ws.close();
     return;
   }
 
-  deleteSession(sessionId); // 
+  await deleteSession(sessionId); // 
 
   const machine = await prisma.machine.findUnique({
     where: { id: session.machineId },
