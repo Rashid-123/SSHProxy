@@ -19,6 +19,16 @@ const app: Express = express();
 app.use(express.json());
 app.use(cookieParser());
 
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'UP',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        message: 'SSHProxy Backend is running smoothly'
+    });
+});
+
+
 app.use(
     cors({
         origin: config.cors.origin,
