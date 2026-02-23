@@ -1,3 +1,4 @@
+import 'module-alias/register';
 import express, { Express } from 'express';
 import cookieParser from 'cookie-parser';
 import http from 'http';
