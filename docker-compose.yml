@@ -32,7 +32,9 @@ services:
     container_name: SSHProxy-backend
     depends_on:
       - postgres
+         condition: service_healthy
       - redis
+          condition: service_healthy
     # Loads all variables from the .env file in the current directory
     env_file:
       - .env
