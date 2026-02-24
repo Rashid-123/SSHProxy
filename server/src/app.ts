@@ -1,14 +1,13 @@
-import 'module-alias/register';
+import 'dotenv/config';
 import express, { Express } from 'express';
 import cookieParser from 'cookie-parser';
 import http from 'http';
 import { setupWebSocketServer } from './websocket';
-
+import { config } from '@/config/env';
 //
-import { connectRedis } from './config/redisClient';
+import { connectRedis, redisClient } from './config/redisClient';
 //
 import cors from 'cors';
-import { config } from '@/config/env';
 import logger from './config/logger';
 import routes from '@/routes/index';
 import { errorHandler } from './middleware/errorHandler';
@@ -65,6 +64,12 @@ export const startServer = async () => {
 
         server.listen(PORT, () => {
             logger.info(`Server running on port ${PORT}`);
+        });
+
+        // Graceful Shutdown - Crucial for Docker/Build environments
+        process.on('SIGINT', async () => {
+            await redisClient.quit();
+            process.exit(0);
         });
     } catch (error) {
         logger.error({ error }, 'failed to start server');

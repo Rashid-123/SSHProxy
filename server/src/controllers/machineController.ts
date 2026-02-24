@@ -208,6 +208,7 @@ export const connect = async (req: AuthRequest, res: Response) => {
       userId: req.user.userId,
       machineId,
     });
+    console.log({ sessionId }, "Session created in Redis --------------");
 
     return res.status(200).json({
       status: "ready",
