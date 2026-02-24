@@ -1,22 +1,27 @@
 FROM node:20-alpine
 
-# Install openssl because Prisma engine needs it to run on Alpine
+# 1. Install system dependencies
 RUN apk add --no-cache openssl
 
 WORKDIR /app
 
+# 2. Install dependencies (Cached layer)
 COPY package*.json ./
-# For Prisma, it's often better to ensure all dependencies are clean
 RUN npm install
 
-COPY . .
-
-# Generate the Prisma Client specifically for the Alpine environment
-# This MUST happen before 'npm run build'
+# 3. Generate Prisma Client (Cached layer)
+# We copy only the prisma folder first so code changes don't trigger a re-generation
+COPY prisma ./prisma/
 RUN npx prisma generate
 
+# 4. Copy source and Build
+COPY . .
 RUN npm run build
 
-EXPOSE 4000
+# 5. Clean up devDependencies to keep the image small
+# This makes the image much faster to pull on EC2
+RUN npm prune --production
+
+EXPOSE 5000
 
 CMD ["node", "dist/app.js"]
