@@ -11,19 +11,21 @@ export const createMachine = async (
         where: { id: userId },
     });
 
+    console.log("------ Creating machine for user: ", userId, " ------");
+
     if (!user) {
         throw new Error("User not found");
     }
 
     const salt = user.encryptionSalt;
-
+      
     // Encrypt private key
     const { encrypted: encryptedPrivateKey, iv: ivPrivateKey, authTag: authTagPrivateKey } = encrypt(
         input.privateKey,
         input.password,
         salt
     );
-
+     
     // Encrypt passphrase if exists
     let encryptedPassphrase = "";
     let ivPassphrase = "";
@@ -34,8 +36,9 @@ export const createMachine = async (
         encryptedPassphrase = result.encrypted;
         ivPassphrase = result.iv;
         authTagPassphrase = result.authTag;
-    }
-
+    } 
+ 
+       console.log("------ Encrypted credentials for machine: ", input.name, " ------");
     const machine = await prisma.machine.create({
         data: {
             name: input.name,
@@ -61,6 +64,7 @@ export const createMachine = async (
 
 // ----------------- List Machines -----------------------------
 export const getMachinesBasicInfo = async (userId: string) => {
+    console.log("------ Fetching machines for user: ", userId, " ------");
     return prisma.machine.findMany({
         where: { ownerId: userId },
         select: {
@@ -82,6 +86,7 @@ export const deleteMachine = async (
     machineId: string,
     userId: string
 ) => {
+    console.log("------ Deleting machine: ", machineId, " for user: ", userId, " ------");
     const machine = await prisma.machine.findUnique({
         where: { id: machineId },
     });
@@ -108,6 +113,7 @@ export const getMachineWithDecryptedCredentials = async (
     userId: string,
     password: string
 ) => {
+    console.log("------ Fetching machine with decrypted credentials: ", machineId, " for user: ", userId, " ------");
     const machine = await prisma.machine.findUnique({
         where: { id: machineId },
     });

@@ -2,10 +2,12 @@ import api from './api';
 import type { AuthRequest , AuthResponse, LogoutResponse } from "@/types";
 
 export const authenticateWithBackend = async (token: string) => {
-  const response = await api.post<AuthResponse>('/api/auth', {
-    token,
-  } as AuthRequest);
-  return response.data;
+  console.log(token)
+  // const response = await api.post<AuthResponse>('/api/auth', {
+  //   token,
+  // } as AuthRequest);
+  // return response.data;
+  return ;
 };
 
 export const getCurrentUser = async () => {

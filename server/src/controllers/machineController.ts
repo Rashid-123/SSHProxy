@@ -14,12 +14,12 @@ import { Prisma } from "@prisma/client";
 
 // --------------------- Create Machine -----------------------------
 export const create = async (req: AuthRequest, res: Response) => {
+  console.log("------ Create machine request received ------");
   try {
     if (!req.user) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-    console.log(req.user)
-
+   console.log("------ Request body: ", req.body, " ------");
     const {
       name,
       hostname,
@@ -34,7 +34,8 @@ export const create = async (req: AuthRequest, res: Response) => {
     if (!name || !hostname || !username || !privateKey || !password) {
       return res.status(400).json({ error: "Missing required fields" });
     }
-
+ 
+    
     const machine = await createMachine(req.user.userId, {
       name,
       hostname,
@@ -44,7 +45,8 @@ export const create = async (req: AuthRequest, res: Response) => {
       passphrase,
       password,
     });
-
+    
+    console.log("------ Machine created with ID: ", machine.id, " ------");
     res.status(201).json({
       status: "success",
       data: {
@@ -78,12 +80,13 @@ export const create = async (req: AuthRequest, res: Response) => {
 
 export const list = async (req: AuthRequest, res: Response) => {
   try {
+    console.log
     if (!req.user) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
     const machines = await getMachinesBasicInfo(req.user.userId);
-
+   console.log("------ Machines fetched for user: ", req.user.userId, " ------");
     res.status(200).json({
       status: "success",
       data: machines,
@@ -104,6 +107,7 @@ export const list = async (req: AuthRequest, res: Response) => {
 
 export const remove = async (req: AuthRequest, res: Response) => {
   try {
+    console.log("------ Delete machine request received ------");
     if (!req.user) {
       return res.status(401).json({ error: "Unauthorized" });
     }
@@ -138,6 +142,7 @@ export const getMachine = async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
+    console.log("------ Get machine request received ------");
     const id = req.params.id as string;
 
     const machine = await prisma.machine.findFirst({
@@ -160,6 +165,7 @@ export const getMachine = async (req: AuthRequest, res: Response) => {
     if (!machine) {
       return res.status(404).json({ error: "Machine not found" });
     }
+    console.log("------ Machine fetched with ID: ", machine.id, " for user: ", req.user.userId, " ------");
 
     res.status(200).json({
       status: "success",
@@ -184,6 +190,8 @@ export const connect = async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
+    console.log("------ Connect to machine request received ------");
+
     const { password } = req.body;
     const machineId = req.params.id as string;
 
@@ -191,12 +199,15 @@ export const connect = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: "Password required" });
     }
 
+
+
     //  This will throw if password wrong
     const machine = await getMachineWithDecryptedCredentials(
       machineId,
       req.user.userId,
       password
     );
+
 
     const sessionId = crypto.randomUUID();
 
