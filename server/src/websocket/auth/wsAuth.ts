@@ -8,21 +8,38 @@ export interface WSAuthResult {
 }
 
 export const authenticateWSUpgrade = (req: IncomingMessage): WSAuthResult => {
-  const cookieHeader = req.headers.cookie;
   console.log("-------- Authenticating WebSocket upgrade ------");
 
-  if (!cookieHeader) {
-    console.warn("-------- No cookie header in WebSocket upgrade request");
-    throw new Error("No cookie header");
+  let token: string | undefined;
+
+  //  Check Authorization Header (Bearer)
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+    console.log("Token found in Authorization header");
   }
 
-  const cookies = parseCookie(cookieHeader);
-  const token = cookies["auth_token"];
-
+  //  If not found, check cookies
   if (!token) {
-    throw new Error("No auth token in cookies");
+    const cookieHeader = req.headers.cookie;
+
+    if (cookieHeader) {
+      const cookies = parseCookie(cookieHeader);
+      token = cookies["auth_token"];
+
+      if (token) {
+        console.log("Token found in cookies");
+      }
+    }
   }
 
+  //  If still no token
+  if (!token) {
+    console.warn("No token provided in header or cookies");
+    throw new Error("Unauthorized: No token provided");
+  }
+
+  //  Verify token
   const decoded = jwt.verify(token, config.jwtSecret) as { userId: string };
 
   return { userId: decoded.userId };

@@ -6,6 +6,7 @@ import { getMachine, deleteMachine } from '@/lib/api/machine';
 import type { MachineBasicInfo } from '@/types/index';
 import MachineDetailCard from '@/components/machine/MachineDetailCard';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { ArrowLeft, Terminal, Trash2 } from 'lucide-react';
 
 export default function MachinePage() {
   const { id } = useParams<{ id: string }>();
@@ -56,10 +57,16 @@ export default function MachinePage() {
   if (error) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-12">
-        <button onClick={() => router.push('/dashboard')} className="text-sm text-blue-600 hover:underline mb-6 block">
-          ← Back to Dashboard
+        <button
+          onClick={() => router.push('/dashboard')}
+          className="flex items-center gap-1.5 text-sm text-slate-muted hover:text-slate-text transition-colors mb-6"
+        >
+          <ArrowLeft size={14} />
+          Back to Dashboard
         </button>
-        <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded text-sm">{error}</div>
+        <div className="p-4 border border-brand-danger text-brand-danger rounded-sm text-sm">
+          {error}
+        </div>
       </div>
     );
   }
@@ -68,26 +75,40 @@ export default function MachinePage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+      {/* Back */}
+      <button
+        onClick={() => router.push('/dashboard')}
+        className="flex items-center gap-1.5 text-sm text-slate-muted hover:text-slate-text transition-colors mb-8"
+      >
+        <ArrowLeft size={14} />
+        Back to Dashboard
+      </button>
+
       {/* Header */}
-      <div className="mb-6">
-        <button onClick={() => router.push('/dashboard')} className="text-sm text-blue-600 hover:underline mb-4 block">
-          ← Back to Dashboard
-        </button>
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">{machine.name}</h1>
+      <div className="flex items-start justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-text">{machine.name}</h1>
+          <p className="text-slate-muted text-sm font-mono mt-1">{machine.hostname}</p>
+        </div>
 
-          {/* Action buttons */}
-          <div className="flex items-center gap-3">
-            <button onClick={() => {router.push(`/machine/${id}/terminal`)}}>terminal</button>
-            <button
-              onClick={handleDelete}
-              disabled={deleting}
-              className="px-4 py-2 text-sm border border-red-300 text-red-600 rounded hover:bg-red-50 disabled:opacity-50"
-            >
-              {deleting ? 'Deleting...' : 'Delete Machine'}
-            </button>
-          </div>
-
+        {/* Action buttons */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.push(`/machine/${id}/terminal`)}
+            className="flex items-center gap-2 px-4 py-2 text-sm bg-brand-primary hover:bg-brand-primaryHover text-slate-text transition-colors rounded-sm"
+          >
+            <Terminal size={14} />
+            Connect
+          </button>
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className="flex items-center gap-2 px-4 py-2 text-sm border border-slate-border text-slate-muted hover:border-brand-danger hover:text-brand-danger disabled:opacity-50 transition-colors rounded-sm"
+          >
+            <Trash2 size={14} />
+            {deleting ? 'Deleting...' : 'Delete'}
+          </button>
         </div>
       </div>
 

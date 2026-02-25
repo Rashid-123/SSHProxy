@@ -15,16 +15,17 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Get initial auth state from server (no client-side delay)
   const { user } = await getServerAuthState();
 
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body>
+      <html lang="en" className="h-full">
+        <body className="h-full flex flex-col">
           <AuthProvider initialUser={user}>
             <Navbar />
-            <main>{children}</main>
+            <main className="flex-1 overflow-y-auto">
+              {children}
+            </main>
           </AuthProvider>
         </body>
       </html>

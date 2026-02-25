@@ -114,6 +114,7 @@ export const handleTerminalConnection = async (
     });
 
     ws.on("close", () => {
+      console.log("-------- WebSocket closed by client, closing SSH stream");
       if (sshStream) {
         sshStream.end();
         sshStream = null;

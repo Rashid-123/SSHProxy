@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -30,7 +31,6 @@ export default function MachinesSection() {
   }, [fetchMachines]);
 
   const handleCreate = async (data: CreateMachineRequest) => {
-    console.log(data)
     await createMachine(data);
     await fetchMachines();
   };
@@ -50,22 +50,28 @@ export default function MachinesSection() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Machines</h2>
+      {/* Section header */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-lg font-semibold text-slate-text">Machines</h2>
+          <p className="text-slate-muted text-xs mt-0.5">{machines.length} machine{machines.length !== 1 ? 's' : ''} configured</p>
+        </div>
         <button
           onClick={() => setShowModal(true)}
-          className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="px-4 py-2 text-sm bg-brand-primary hover:bg-brand-primaryHover text-slate-text transition-colors rounded-sm"
         >
           + Add Machine
         </button>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded text-sm">{error}</div>
+        <div className="mb-6 p-3 border border-brand-danger text-brand-danger text-sm rounded-sm">
+          {error}
+        </div>
       )}
 
       {loading ? (
-        <p className="text-gray-500 text-sm">Loading machines...</p>
+        <p className="text-slate-muted text-sm">Loading machines...</p>
       ) : (
         <MachineList machines={machines} onDelete={handleDelete} deleting={deleting} />
       )}

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,7 +12,6 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      console.log("User not authenticated, redirecting to login...");
       router.push('/login');
     }
   }, [isAuthenticated, router]);
@@ -23,12 +21,14 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
-
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <MachinesSection />
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 overflow-hidden">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-slate-text">Dashboard</h1>
+        <p className="text-slate-muted mt-2 text-sm">
+          Manage your machines and open terminal sessions from here.
+        </p>
       </div>
+      <MachinesSection />
     </div>
   );
 }

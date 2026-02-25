@@ -1,43 +1,23 @@
+
 'use client';
 
-import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import  LandingPage  from '@/components/home/LandingPage';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
-export default function Home() {
-  const { isAuthenticated } = useAuth();
+export default function HomePage() {
+  const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to MyApp</h1>
-        <p className="text-gray-600 mb-8">
-          Secure SSH proxy with 24-hour persistent sessions
-        </p>
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, router]);
 
-        {isAuthenticated ? (
-          <Link
-            href="/dashboard"
-            className="inline-block px-6 py-3 bg-gray-900 text-white rounded hover:bg-gray-700"
-          >
-            Go to Dashboard
-          </Link>
-        ) : (
-          <div className="flex gap-4 justify-center">
-            <Link
-              href="/login"
-              className="px-6 py-3 border border-gray-900 text-gray-900 rounded hover:bg-gray-100"
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="px-6 py-3 bg-gray-900 text-white rounded hover:bg-gray-700"
-            >
-              Get Started
-            </Link>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  if (isAuthenticated) return <LoadingSpinner />;
+
+  return <LandingPage />;
 }

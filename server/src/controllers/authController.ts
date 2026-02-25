@@ -59,9 +59,10 @@ export const handleClerkAuth = async (req: Request, res: Response) => {
         console.log("---- successfully authenticated -----------")
 
         res.status(200).json({
-            status: 'success',
+            status: 'success', 
             user: {
                 id: user.id,
+                token: appToken,
                 clerkId: user.clerkId,
                 email: user.email,
                 firstName: user.firstName,

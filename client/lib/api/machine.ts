@@ -4,7 +4,7 @@ import type { CreateMachineRequest, CreateMachineResponse, DeleteMachineResponse
 
 export const createMachine = async (data: CreateMachineRequest) => {
     console.log(data)
-    const response = await api.post<CreateMachineResponse>('/api/machine', 
+    const response = await api.post<CreateMachineResponse>('/api/machine/create', 
         data)
     console.log(response)
 
