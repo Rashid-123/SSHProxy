@@ -23,7 +23,7 @@ export default function LoginPage() {
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-4rem)] py-12">
       <SignIn 
-        afterSignInUrl="/auth/callback"
+        fallbackRedirectUrl="/auth/callback"
         redirectUrl="/auth/callback"
       />
     </div>

@@ -46,7 +46,7 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
     if (isLoggingOutRef.current) return;
     
     try {
-      const data = await authenticateWithBackend(token);
+      const data:any = await authenticateWithBackend(token);
       setUser(data.user);
       router.push('/dashboard');
     } catch (error) {
@@ -59,7 +59,7 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
     if (isLoggingOutRef.current) return;
     
     try {
-      const data = await authenticateWithBackend(token);
+      const data:any = await authenticateWithBackend(token);
       setUser(data.user);
       router.push('/dashboard');
     } catch (error) {

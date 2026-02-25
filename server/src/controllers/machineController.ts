@@ -29,7 +29,7 @@ export const create = async (req: AuthRequest, res: Response) => {
       passphrase,
       password,
     } = req.body;
-    
+
     console.log(name, hostname, username, privateKey, password)
 
     if (!name || !hostname || !username || !privateKey || !password) {
@@ -226,6 +226,7 @@ export const connect = async (req: AuthRequest, res: Response) => {
       status: "ready",
       sessionId,
     });
+    
   } catch (err: any) {
     return res.status(401).json({ error: "Invalid password" });
   }
