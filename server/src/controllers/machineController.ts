@@ -29,6 +29,7 @@ export const create = async (req: AuthRequest, res: Response) => {
       passphrase,
       password,
     } = req.body;
+    
     console.log(name, hostname, username, privateKey, password)
 
     if (!name || !hostname || !username || !privateKey || !password) {

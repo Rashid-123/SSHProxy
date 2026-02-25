@@ -7,7 +7,7 @@ const router = Router();
 
 router.use(authenticateFromCookie);
 
-router.post('/', machineController.create);
+router.post('/create', machineController.create);
 router.get('/', machineController.list);
 
 
