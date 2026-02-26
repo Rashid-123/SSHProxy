@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { redisClient, connectRedis } from '@/config/redisClient';
 import jwt from "jsonwebtoken";
 import { config } from '@/config/env';
 import logger from '@/config/logger';
@@ -6,8 +7,12 @@ import type { AuthRequest } from '@/types/types';
 import prisma from '@/lib/prisma';
 
 // Simple in-memory cache (further use Redis)
-const userCache = new Map<string, { user: any; expires: number }>();
 
+const ensureConnected = async () => {
+    if (!redisClient.isOpen) {
+        await connectRedis();
+    }
+}
 export async function authenticateFromCookie(
     req: AuthRequest,
     res: Response,
@@ -32,17 +37,17 @@ export async function authenticateFromCookie(
         };
 
         // Check cache first (2 minute TTL)
-        const cached = userCache.get(decoded.userId);
-        const now = Date.now();
-
+        await ensureConnected();
+        const cached = await redisClient.get(`user:${decoded.userId}`);
+    
         let user;
 
-        if (cached && cached.expires > now) {
-            // Use cached user
-            user = cached.user;
+        if (cached) {
+            console.log("User found in cache");
+            user = JSON.parse(cached);
             logger.debug({ userId: decoded.userId }, 'User from cache');
         } else {
-            // Query database
+            console.log("User not in cache, fetching from database");
             user = await prisma.user.findUnique({
                 where: { id: decoded.userId },
                 select: {
@@ -50,7 +55,6 @@ export async function authenticateFromCookie(
                     email: true,
                     firstName: true,
                     lastName: true,
-
                 }
             });
 
@@ -59,12 +63,8 @@ export async function authenticateFromCookie(
                 return res.status(401).json({ error: 'Unauthorized: User not found' });
             }
 
-
-            // Cache for 2 minutes
-            userCache.set(decoded.userId, {
-                user,
-                expires: now + (2 * 60 * 1000)
-            });
+            // await ensureConnected();
+            await redisClient.set(`user:${user.id}`, JSON.stringify(user), { EX: 120 });
 
             logger.debug({ userId: decoded.userId }, 'User from database');
         }
@@ -91,5 +91,7 @@ export async function authenticateFromCookie(
 
 // Clear cache on logout
 export function clearUserCache(userId: string) {
-    userCache.delete(userId);
+    redisClient.del(`user:${userId}`).catch((error: any) => {
+        logger.error({ error, userId }, 'Failed to clear user cache');
+    });
 }
