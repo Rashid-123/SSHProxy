@@ -17,7 +17,7 @@ export const setupWebSocketServer = (server: HTTPServer) => {
       socket.destroy();
       return;
     }
-
+    
     // Authenticate during upgrade — before connection is accepted
     let userId: string;
     try {

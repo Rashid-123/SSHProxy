@@ -1,13 +1,20 @@
+
 export interface TerminalSocketOptions {
     sessionId: string;
     backendUrl: string;
     onData: (data: string) => void;
-    onClose: () => void;
+    onClose: (code?:number , reason?:string) => void;
     onError: (err: Event) => void;
+}
+
+interface ServerHeartbeatPing {
+    type: 'heartbeat_ping';
+    timestamp?: number;
 }
 
 export class TerminalSocket {
     private ws: WebSocket | null = null;
+    
 
     constructor(private options: TerminalSocketOptions) { }
 
@@ -19,12 +26,33 @@ export class TerminalSocket {
         // Receive data from SSH (via backend) — write to xterm
         this.ws.onmessage = (event) => {
             console.log("Received data from WebSocket: ", event.data);
+
+            if (typeof event.data === 'string') {
+                try {
+                    const parsed = JSON.parse(event.data) as ServerHeartbeatPing;
+
+                    if (parsed.type === 'heartbeat_ping') {
+                        this.ws?.send(JSON.stringify({
+                            type: 'heartbeat_pong',
+                            timeStamp: Date.now(),
+                        }));
+                        return;
+                    }
+
+                } catch {
+
+                }
+
+                this.options.onData(event.data);
+                return;
+            }
+
             this.options.onData(event.data);
         };
 
-        this.ws.onclose = () => {
+        this.ws.onclose = (event) => {
             console.log("WebSocket connection closed");
-            this.options.onClose();
+            this.options.onClose(event.code, event.reason);
         };
 
         this.ws.onerror = (err) => {

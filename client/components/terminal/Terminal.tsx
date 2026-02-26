@@ -17,6 +17,19 @@ export default function Terminal({ sessionId }: TerminalProps) {
     const fitAddonRef = useRef<FitAddon | null>(null);
     const resizeHandlerRef = useRef<(() => void) | null>(null);
 
+    const getCloseMessage = (code?: number, reason?: string): string => {
+        switch (code) {
+            case 1000: return 'Terminal session ended.';
+            case 1011: return 'SSH error — could not connect to machine.';
+            case 4001: return 'Session invalid or expired. Please start a new session.';
+            case 4003: return 'Unauthorized session.';
+            case 4004: return 'Machine not found.';
+            case 4006: return 'Connection timed out — no response from client.';
+            case 4008: return 'Terminal closed due to inactivity.';
+            default: return reason || 'Connection closed.';
+        }
+    };
+
     useEffect(() => {
         if (!terminalRef.current) return;
 
@@ -46,7 +59,15 @@ export default function Terminal({ sessionId }: TerminalProps) {
                 sessionId,
                 backendUrl: process.env.NEXT_PUBLIC_WS_URL!,
                 onData: (data) => xterm.write(data),
-                onClose: () => xterm.write('\r\n\x1b[31mConnection closed.\x1b[0m\r\n'),
+                onClose: (code, reason) => {
+                    const message = getCloseMessage(code, reason);
+                    xterm.write(`\r\n\x1b[31m${message}\x1b[0m\r\n`);
+                    xterm.write('\r\n\x1b[33mPress any key to reload...\x1b[0m\r\n');
+
+                    // optional: let user trigger reload by pressing a key
+                    xterm.onData(() => window.location.reload());
+                },
+                // onClose: () => xterm.write('\r\n\x1b[31mConnection closed.\x1b[0m\r\n'),
                 onError: () => xterm.write('\r\n\x1b[31mConnection error.\x1b[0m\r\n'),
             });
 

@@ -115,7 +115,7 @@ export default function TerminalPage() {
     );
   }
 
-  // Terminal — fills remaining height below navbar
+  
   return (
     <div className="h-[calc(100vh-4rem)] bg-slate-terminal overflow-hidden">
       <Terminal sessionId={sessionId!} />

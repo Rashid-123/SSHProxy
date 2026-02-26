@@ -1,135 +1,101 @@
+
 import WebSocket from "ws";
 import { IncomingMessage } from "http";
-import { consumeSession } from "@/lib/sessionStore";
-import { createSSHShell, resizeSSHShell } from "@/services/sshService";
-import prisma from "@/lib/prisma";
+import { createSSHShell } from "@/services/sshService";
 import logger from "@/config/logger";
-
-interface ResizeMessage {
-  type: "resize";
-  cols: number;
-  rows: number;
-}
+import { validateSessionOwnership, fetchMachine } from "./terminalValidation";
+import { createActivityTracker } from "./terminalState";
+import { startHeartbeat } from "./heartbeat";
+import { handleClientMessage } from "./terminalMessageHandler";
 
 export const handleTerminalConnection = async (
   ws: WebSocket,
   req: IncomingMessage,
   userId: string
 ) => {
-
+  // -------------------- Parse Session ID -------------------------------------
   const url = new URL(req.url!, `http://localhost`);
   const sessionId = url.searchParams.get("sessionId");
 
-  console.log("-------- Handling terminal connection, sessionId: ", sessionId, " for user ", userId);
-
   if (!sessionId) {
-    console.log("-------- No sessionId provided in WebSocket connection");
     ws.close(4000, "Missing sessionId");
     return;
   }
 
-  // Consume session — validates ownership + marks as used
-  const session = await consumeSession(sessionId);
-  
-  console.log("-------- Session consumed: for sessionId ", sessionId);
-  if (!session) {
-    ws.close(4001, "Invalid or expired session");
-    return;
-  }
+  // ------------------------- Validate Session & Machine --------------------------------
+  const session = await validateSessionOwnership(sessionId, userId, ws);
+  if (!session) return;
 
-  // Cross-check: session must belong to the authenticated user
-  if (session.userId !== userId) {
-    ws.close(4003, "Session does not belong to this user");
-    return;
-  }
+  const machine = await fetchMachine(session.machineId, userId, ws);
+  if (!machine) return;
 
-  // Fetch machine details (hostname, port, username)
-  const machine = await prisma.machine.findFirst({
-    where: { id: session.machineId, ownerId: userId },
-    select: { hostname: true, port: true, username: true },
-  });
-
-  if (!machine) {
-    ws.close(4004, "Machine not found");
-    return;
-  }
-
-  // Capture credentials before they're cleared
-  const privateKey = session.privateKey;
-  const passphrase = session.passphrase;
+  // -------------- State Setup ----------------------------------
+  const tracker = createActivityTracker();
+  const { privateKey, passphrase } = session;
 
   let sshStream: any = null;
+  let heartbeatInterval: NodeJS.Timeout | null = null;
+  let closed = false;
 
+  const cleanup = () => {
+    if (closed) return;
+    closed = true;
+
+    if (heartbeatInterval) {
+      clearInterval(heartbeatInterval);
+      heartbeatInterval = null;
+    }
+
+    if (sshStream) {
+      sshStream.end();
+      sshStream = null;
+    }
+  };
+
+  const closeConnection = (code: number, reason: string) => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.close(code, reason);
+    }
+    cleanup();
+  };
+
+  // ----------------- SSH Connection -------------------------------------
   try {
-    console.log("-------- Establishing SSH connection to ", machine.hostname, " for user ", userId);
     const { stream } = await createSSHShell(
-      {
-        hostname: machine.hostname,
-        port: machine.port,
-        username: machine.username,
-        privateKey,
-        passphrase,
-      },
-      { rows: 24, cols: 80 }, // default — client will send resize immediately
+      { hostname: machine.hostname, port: machine.port, username: machine.username, privateKey, passphrase },
+      { rows: 24, cols: 80 },
       (data) => {
+        tracker.markDataActivity();
         if (ws.readyState === WebSocket.OPEN) {
-          console.log("-------- Sending data to WebSocket (frontend): ", data);
           ws.send(data.toString());
         }
       },
-      () => {
-        // SSH closed
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.close(1000, "SSH connection closed");
-        }
-      },
+      () => closeConnection(1000, "SSH connection closed"),
       (err) => {
         logger.error({ err }, "SSH error");
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.close(1011, "SSH error");
-        }
+        closeConnection(1011, "SSH error");
       }
     );
-     
-    console.log("-------- SSH connection established for ", machine.hostname, " user ", userId);
+
     sshStream = stream;
 
+    // ------------ HeartbeatInterval -------------------------------------------
+    heartbeatInterval = startHeartbeat(ws, tracker, closeConnection, { userId, sessionId });
+
+    // -------------- WebSocket Listeners ------------------------------------
     ws.on("message", (message: Buffer | string) => {
-      try {
-        // Try to parse as JSON for control messages (resize)
-        const text = message.toString();
-        const parsed = JSON.parse(text) as ResizeMessage;
-
-        if (parsed.type === "resize" && sshStream) {
-          console.log("-------- Resizing SSH shell to cols: ", parsed.cols, " rows: ", parsed.rows);
-          resizeSSHShell(sshStream, { rows: parsed.rows, cols: parsed.cols });
-        }
-      } catch {
-        // Not JSON — raw terminal input, write directly to SSH
-        console.log("-------- Received message from WebSocket (frontend), writing to SSH stream", message.toString());
-        if (sshStream) {
-          sshStream.write(message);
-        }
-      }
+      handleClientMessage(message, sshStream, tracker);
     });
 
-    ws.on("close", () => {
-      console.log("-------- WebSocket closed by client, closing SSH stream");
-      if (sshStream) {
-        sshStream.end();
-        sshStream = null;
-      }
-    });
+    ws.on("close", () => cleanup());
 
     ws.on("error", (err) => {
       logger.error({ err }, "WebSocket error");
-      if (sshStream) {
-        sshStream.end();
-        sshStream = null;
-      }
+      cleanup();
     });
+
   } catch (err) {
     logger.error({ err }, "Failed to establish SSH connection");
-    ws.close(1011, "Failed to connect to machine");
+    closeConnection(1011, "Failed to connect to machine");
   }
 };
