@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { listMachines, createMachine, deleteMachine } from '@/lib/api/machine';
 import type { MachineBasicInfo, CreateMachineRequest } from '@/types/index';
+import LoadingSpinner from '../ui/LoadingSpinner';
 import AddMachineModal from './Addmachinemodal';
 import MachineList from './MachineList';
 
@@ -54,7 +55,7 @@ export default function MachinesSection() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-lg font-semibold text-slate-text">Machines</h2>
-          <p className="text-slate-muted text-xs mt-0.5">{machines.length} machine{machines.length !== 1 ? 's' : ''} configured</p>
+          <p className="text-slate-muted text-sm mt-0.5">{machines.length} machine{machines.length !== 1 ? 's' : ''} configured</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
@@ -71,7 +72,12 @@ export default function MachinesSection() {
       )}
 
       {loading ? (
-        <p className="text-slate-muted text-sm">Loading machines...</p>
+
+        <div className="flex items-center justify-center min-h-[300px]">
+          <p className="text-brand-primary text-sm">Loading machines...</p>
+          
+        </div>
+
       ) : (
         <MachineList machines={machines} onDelete={handleDelete} deleting={deleting} />
       )}
