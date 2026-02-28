@@ -49,7 +49,8 @@ export const handleClerkAuth = async (req: Request, res: Response) => {
         res.cookie('auth_token', appToken, {
             httpOnly: true,
             secure: config.nodeEnv === 'production',
-            sameSite: 'lax',
+            sameSite: 'none',
+            domain:".sshproxy.in",
             maxAge: 1 * 24 * 60 * 60 * 1000, // 1 DAYS
             path: '/',
         });
