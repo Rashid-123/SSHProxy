@@ -1,9 +1,10 @@
 version: '3.8'
 
 services:
-  postgres:
+   postgres:
     image: postgres:15-alpine
     container_name: SSHProxy-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: SSHProxy_user
       POSTGRES_PASSWORD: SSHProxy_password
@@ -16,9 +17,10 @@ services:
       timeout: 5s
       retries: 5
 
-  redis:
+   redis:
     image: redis:7-alpine
     container_name: SSHProxy-redis
+    restart: unless-stopped
     volumes:
       - redis_data:/data
     healthcheck:
@@ -27,9 +29,10 @@ services:
       timeout: 5s
       retries: 5  
 
-  backend:
+   backend:
     build: ./server
     container_name: SSHProxy-backend
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
@@ -39,7 +42,6 @@ services:
       - .env
     ports:
       - "5000:5000"
-    restart: always
 
 volumes:
   postgres_data:
