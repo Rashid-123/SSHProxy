@@ -6,7 +6,7 @@ import Navbar from '@/components/Navbar';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'MyApp - SSH Proxy',
+  title: 'SSHProxy - Browser based SSH terminal',
   description: 'Secure SSH proxy with persistent sessions',
 };
 

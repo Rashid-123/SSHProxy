@@ -29,7 +29,11 @@ export default function Navbar() {
           <div className="flex justify-between h-16 items-center">
 
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-1 text-2xl font-semibold tracking-tight">
+
+           
+
+            <Link href="/" className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
+              <img src="/logo.png" alt="Logo" className="h-6 w-6 object-contain" />
               <span className="text-slate-text font-mono">SSH</span>
               <span className="text-brand-primary font-mono">Proxy</span>
             </Link>
