@@ -30,13 +30,13 @@ export default function Navbar() {
 
             {/* Logo */}
 
-           
-
             <Link href="/" className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
               <img src="/logo.png" alt="Logo" className="h-6 w-6 object-contain" />
-              <span className="text-slate-text font-mono">SSH</span>
-              <span className="text-brand-primary font-mono">Proxy</span>
+              <span className="font-mono">
+                <span className="text-slate-text">SSH</span><span className="text-brand-primary">Proxy</span>
+              </span>
             </Link>
+
 
             {/* Desktop right */}
             <div className="hidden sm:flex items-center gap-6">
