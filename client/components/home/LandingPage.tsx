@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Shield, Key, Zap, Monitor, Lock, RefreshCw, Terminal, ChevronRight } from 'lucide-react';
+import { Shield, Key, Zap, Monitor, Lock, RefreshCw, Terminal, ChevronRight, Github, Linkedin, Globe } from 'lucide-react';
 
 export default function LandingPage() {
     return (
@@ -178,6 +178,77 @@ export default function LandingPage() {
                 </Link>
             </section>
 
+            {/* Footer */}
+            <div className='border-t border-slate-border'>
+                <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 ">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+
+                        {/* Left — built by */}
+                        <div className="text-center sm:text-left">
+                            <p className="text-slate-text text-sm font-mono">
+                                Built by{' '}
+                                <a
+                                    href="https://rashid-tau.vercel.app/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-brand-primaryHover hover:text-brand-primary transition-colors"
+                                >
+                                    Shadan Rashid
+                                </a>
+                                {' '}— open source &amp; self-hostable.
+                            </p>
+                            <p className="text-slate-muted text-sm font-mono mt-1">
+                                © {new Date().getFullYear()} SSHProxy. All rights reserved.
+                            </p>
+                        </div>
+
+                        {/* Right — links */}
+                        <div className="flex items-center gap-5">
+                            <a
+                                href="https://github.com/Rashid-123/SSHProxy"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 text-slate-muted hover:text-slate-text transition-colors text-sm font-mono"
+                                aria-label="GitHub Repo"
+                            >
+                                <Github size={16} />
+                                Repo
+                            </a>
+                            <span className="w-px h-3 bg-slate-border" />
+                            <a
+                                href="https://github.com/Rashid-123"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-slate-muted hover:text-slate-text transition-colors"
+                                aria-label="GitHub"
+                            >
+                                <Github size={16} />
+                            </a>
+                            <a
+                                href="https://www.linkedin.com/in/shadan-rashid/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-slate-muted hover:text-slate-text transition-colors"
+                                aria-label="LinkedIn"
+                            >
+                                <Linkedin size={16} />
+                            </a>
+                            <a
+                                href="https://rashid-tau.vercel.app/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-slate-muted hover:text-slate-text transition-colors"
+                                aria-label="Portfolio"
+                            >
+                                <Globe size={16} />
+                            </a>
+                        </div>
+
+                    </div>
+                </footer>
+            </div>
+
         </div>
     );
 }
+
