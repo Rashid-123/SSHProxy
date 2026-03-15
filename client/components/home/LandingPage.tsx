@@ -11,7 +11,7 @@ export default function LandingPage() {
             <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20 text-center">
                 <div className="inline-flex items-center gap-2 px-3 py-1 border border-slate-border text-slate-muted md:text-sm text-xs mb-8 font-mono">
                     <span className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
-                    Browser-based SSH proxy — no client software required
+                    Browser-based SSH Terminal — no client software required
                 </div>
 
                 <h1 className="text-5xl sm:text-6xl font-bold text-slate-text leading-tight mb-6 tracking-tight font-mono">
@@ -20,7 +20,7 @@ export default function LandingPage() {
                 </h1>
 
                 <p className="text-slate-muted text-lg max-w-xl mx-auto mb-10 leading-relaxed">
-                    A secure, browser-based SSH proxy. Your private keys are encrypted
+                    A secure, browser-based SSH Terminal. Your private keys are encrypted
                     before storage —  it is never saved in plain text.
                 </p>
 
